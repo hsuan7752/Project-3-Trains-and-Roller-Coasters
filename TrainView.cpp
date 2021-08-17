@@ -366,6 +366,8 @@ void TrainView::drawStuff(bool doingShadows)
 	// call your own track drawing code
 	//####################################################################
 
+	drawTrack(doingShadows);
+
 #ifdef EXAMPLE_SOLUTION
 	drawTrack(this, doingShadows);
 #endif
@@ -445,4 +447,127 @@ doPick()
 		selectedCube = -1;
 
 	printf("Selected Cube %d\n",selectedCube);
+}
+
+enum Type
+{
+	LINEAR = 1, CARDINAL, B_SPLINE
+};
+
+void TrainView::
+drawTrack(bool doingShadow)
+{
+	unsigned int DIVIDE_LINE = 500;
+
+	int splineType = -1;
+
+	splineType = tw->splineBrowser->value();
+
+	for (size_t i = 0; i < m_pTrack->points.size(); ++i)
+	{
+		//pos
+		Pnt3f cp_pos_p1 = m_pTrack->points[i].pos;
+		Pnt3f cp_pos_p2 = m_pTrack->points[(i + 1) % m_pTrack->points.size()].pos;
+		Pnt3f cp_pos_p3 = m_pTrack->points[(i + 2) % m_pTrack->points.size()].pos;
+		Pnt3f cp_pos_p4 = m_pTrack->points[(i + 3) % m_pTrack->points.size()].pos;
+
+		//orient
+		Pnt3f cp_orient_p1 = m_pTrack->points[i].orient;
+		Pnt3f cp_orient_p2 = m_pTrack->points[(i + 1) % m_pTrack->points.size()].orient;
+		Pnt3f cp_orient_p3 = m_pTrack->points[(i + 2) % m_pTrack->points.size()].orient;
+		Pnt3f cp_orient_p4 = m_pTrack->points[(i + 3) % m_pTrack->points.size()].orient;
+
+		float percent = 1.0f / DIVIDE_LINE;
+		float t = 0;
+		Pnt3f qt, orient_t;
+
+		switch (splineType)
+		{
+		case Type::LINEAR:
+			qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
+			break;
+		case Type::CARDINAL:
+			qt = cp_pos_p2;
+			break;
+		case Type::B_SPLINE:
+			qt = cp_pos_p1 * (1.0f / 6.0f) + cp_pos_p2 * (4.0f / 6.0f) + cp_pos_p3 * (1.0f / 6.0f);
+			break;
+		}
+
+		for (size_t j = 0; j < DIVIDE_LINE; ++j)
+		{
+			Pnt3f qt0 = qt;
+			t += percent;
+
+			float G[3][4]{ { cp_pos_p1.x, cp_pos_p2.x, cp_pos_p3.x, cp_pos_p4.x },
+						   { cp_pos_p1.y, cp_pos_p2.y, cp_pos_p3.y, cp_pos_p4.y }, 
+						   { cp_pos_p1.z, cp_pos_p2.z, cp_pos_p3.z, cp_pos_p4.z } };
+
+			float M_cardinal[4][4]{ { -0.5,  1.5, -1.5,  0.5 },
+									{    1, -2.5,    2, -0.5 },
+									{ -0.5,    0,  0.5,    0 },
+									{    0,    1,    0,    0 } };
+
+			float M_b_spline[4][4]{ { -0.1667, 0.5, -0.5, 0.1667 },
+									{ 0.5, -1, 0.5, 0 },
+									{ -0.5, 0, 0.5, 0 },
+									{ 0.1667, 0.6667, 0.1667, 0} };
+
+			float T[4] { pow(t, 3), pow(t, 2), t, 1 };
+
+			float C[4]{ 0 };
+
+			switch (splineType)
+			{
+			case Type::LINEAR:
+				qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
+				orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
+				break;
+			case Type::CARDINAL:
+				Mult_Q(C, M_cardinal, T);
+				qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+				orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+				break;
+			case Type::B_SPLINE:
+				Mult_Q(C, M_b_spline, T);
+				qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+				orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+				break;
+			}
+
+			Pnt3f qt1 = qt;
+
+			orient_t.normalize();
+
+			Pnt3f sub;
+			sub.x = qt1.x - qt0.x;
+			sub.y = qt1.y - qt0.y;
+			sub.z = qt1.z - qt0.z;
+
+			Pnt3f cross_t = sub * orient_t;
+			cross_t.normalize();
+			cross_t = cross_t * 2.5f;
+
+			glLineWidth(3);
+			glBegin(GL_LINES);
+			if (!doingShadow)
+				glColor3ub(32, 32, 64);
+			glVertex3f(qt0.x + cross_t.x, qt0.y + cross_t.y, qt0.z + cross_t.z);
+			glVertex3f(qt1.x + cross_t.x, qt1.y + cross_t.y, qt1.z + cross_t.z);
+
+			glVertex3f(qt0.x - cross_t.x, qt0.y - cross_t.y, qt0.z - cross_t.z);
+			glVertex3f(qt1.x - cross_t.x, qt1.y - cross_t.y, qt1.z - cross_t.z);
+
+			glEnd();
+			glLineWidth(1);
+		}
+	}
+}
+
+void TrainView::
+Mult_Q(float* C, float M[][4], float* T)
+{
+	for (int i = 0; i < 4; ++i)
+		for (int j = 0; j < 4; ++j)
+			C[i] += M[i][j] * T[j];
 }
