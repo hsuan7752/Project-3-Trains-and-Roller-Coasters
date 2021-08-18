@@ -230,6 +230,7 @@ void TrainView::draw()
 		glEnable(GL_LIGHT1);
 		glEnable(GL_LIGHT2);
 	}
+	
 
 	//*********************************************************************
 	//
@@ -282,6 +283,9 @@ void TrainView::draw()
 		drawStuff(true);
 		unsetupShadows();
 	}
+
+	/*spotLight();*/
+	pointLight();
 }
 
 //************************************************************************
@@ -382,6 +386,9 @@ void TrainView::drawStuff(bool doingShadows)
 	if (!tw->trainCam->value())
 		drawTrain(this, doingShadows);
 #endif
+
+	if (!tw->trainCam->value())
+		drawTrain(doingShadows);
 }
 
 // 
@@ -457,7 +464,7 @@ enum Type
 void TrainView::
 drawTrack(bool doingShadow)
 {
-	unsigned int DIVIDE_LINE = 500;
+	unsigned int DIVIDE_LINE = 10000;
 
 	int splineType = -1;
 
@@ -511,7 +518,7 @@ drawTrack(bool doingShadow)
 			float M_b_spline[4][4]{ { -0.1667, 0.5, -0.5, 0.1667 },
 									{ 0.5, -1, 0.5, 0 },
 									{ -0.5, 0, 0.5, 0 },
-									{ 0.1667, 0.6667, 0.1667, 0} };
+									{ 0.1667, 0.6667, 0.1667, 0 } };
 
 			float T[4] { pow(t, 3), pow(t, 2), t, 1 };
 
@@ -569,5 +576,56 @@ Mult_Q(float* C, float M[][4], float* T)
 {
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
-			C[i] += M[i][j] * T[j];
+			C[i] += M[j][i] * T[j];
+}
+
+void TrainView::
+spotLight()
+{
+	float noAmbient[] = { 0.0f, 0.0f, 0.2f, 1.0f };
+	float diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	float position[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+}
+
+void TrainView::
+pointLight()
+{
+	float yellowAmbientDiffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	float position[] = { 0.0f, 100.0f, 0.0f, 1.0f };
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
+	glLightfv(GL_LIGHT1, GL_POSITION, position);
+}
+
+void TrainView::
+drawTrain(bool doingShadow)
+{
+	Pnt3f qt, orient_t;
+
+	for (size_t i = 0; i < m_pTrack->points.size(); ++i)
+	{
+		//pos
+		Pnt3f cp_pos_p1 = m_pTrack->points[i].pos;
+		Pnt3f cp_pos_p2 = m_pTrack->points[(i + 1) % m_pTrack->points.size()].pos;
+		//orient
+		Pnt3f cp_orient_p1 = m_pTrack->points[i].orient;
+		Pnt3f cp_orient_p2 = m_pTrack->points[(i + 1) % m_pTrack->points.size()].orient;
+
+		float t = 0;
+		
+		qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
+		orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
+	}
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(qt.x - 5, qt.y - 5, qt.z - 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(qt.x + 5, qt.y - 5, qt.z - 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(qt.x + 5, qt.y + 5, qt.z - 5);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(qt.x - 5, qt.y + 5, qt.z - 5);
+	glEnd();
 }

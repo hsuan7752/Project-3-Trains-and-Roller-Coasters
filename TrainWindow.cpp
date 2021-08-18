@@ -142,6 +142,9 @@ TrainWindow(const int x, const int y)
 
 		pty+=30;
 
+		/*Fl_Button* spotLight = new Fl_Button(605, pty, 60, 20, "Spot");
+		spotLight->callback((Fl_Callback*) )*/
+
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
@@ -213,4 +216,6 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
+
+	
 }

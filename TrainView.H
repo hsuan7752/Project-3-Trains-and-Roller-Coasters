@@ -80,6 +80,12 @@ class TrainView : public Fl_Gl_Window
 
 		void Mult_Q(float* C, float M[][4], float* T);
 
+		void spotLight();
+
+		void pointLight();
+
+		void drawTrain(bool doingShadow);
+
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
