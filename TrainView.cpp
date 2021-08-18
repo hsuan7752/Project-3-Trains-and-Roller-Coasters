@@ -284,8 +284,22 @@ void TrainView::draw()
 		unsetupShadows();
 	}
 
-	/*spotLight();*/
-	pointLight();
+	if (tw->spotLT->value())
+		spotLight();
+	else
+		glDisable(GL_LIGHT1);
+
+	if (tw->pointLT->value())
+	{
+		float yellowAmbientDiffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+		float position[] = { 0.0f, 100.0f, 0.0f, 1.0f };
+
+		glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
+		glLightfv(GL_LIGHT1, GL_POSITION, position);
+	}
+	else
+		glDisable(GL_LIGHT1);
 }
 
 //************************************************************************
@@ -515,10 +529,10 @@ drawTrack(bool doingShadow)
 									{ -0.5,    0,  0.5,    0 },
 									{    0,    1,    0,    0 } };
 
-			float M_b_spline[4][4]{ { -0.1667, 0.5, -0.5, 0.1667 },
-									{ 0.5, -1, 0.5, 0 },
-									{ -0.5, 0, 0.5, 0 },
-									{ 0.1667, 0.6667, 0.1667, 0 } };
+			float M_b_spline[4][4]{ { -0.1667,    0.5,   -0.5, 0.1667 },
+									{     0.5,     -1,    0.5,      0 },
+									{    -0.5,      0,    0.5,      0 },
+									{  0.1667, 0.6667, 0.1667,      0 } };
 
 			float T[4] { pow(t, 3), pow(t, 2), t, 1 };
 
@@ -567,6 +581,8 @@ drawTrack(bool doingShadow)
 
 			glEnd();
 			glLineWidth(1);
+
+			drawSleeper();
 		}
 	}
 }
@@ -577,25 +593,6 @@ Mult_Q(float* C, float M[][4], float* T)
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 			C[i] += M[j][i] * T[j];
-}
-
-void TrainView::
-spotLight()
-{
-	float noAmbient[] = { 0.0f, 0.0f, 0.2f, 1.0f };
-	float diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	float position[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-}
-
-void TrainView::
-pointLight()
-{
-	float yellowAmbientDiffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-	float position[] = { 0.0f, 100.0f, 0.0f, 1.0f };
-
-	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
-	glLightfv(GL_LIGHT1, GL_POSITION, position);
 }
 
 void TrainView::
@@ -628,4 +625,10 @@ drawTrain(bool doingShadow)
 	glTexCoord2f(0.0f, 1.0f);
 	glVertex3f(qt.x - 5, qt.y + 5, qt.z - 5);
 	glEnd();
+}
+
+void TrainView::
+drawSleeper()
+{
+
 }

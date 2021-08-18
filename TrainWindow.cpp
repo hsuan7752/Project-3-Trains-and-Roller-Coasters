@@ -142,8 +142,13 @@ TrainWindow(const int x, const int y)
 
 		pty+=30;
 
-		/*Fl_Button* spotLight = new Fl_Button(605, pty, 60, 20, "Spot");
-		spotLight->callback((Fl_Callback*) )*/
+		spotLT = new Fl_Button(605, pty, 60, 20, "Spot");
+		togglify(spotLT);
+
+		pointLT = new Fl_Button(670, pty, 60, 20, "Point");
+		togglify(pointLT);
+
+		pty += 25;
 
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION

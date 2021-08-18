@@ -90,8 +90,8 @@ class TrainWindow : public Fl_Double_Window {
 		Fl_Value_Slider*	speed;
 		Fl_Button*			arcLength;		// do we use arc length for speed?
 
-		Fl_Button*			spotLight;
-		Fl_Button*			pointLight;
+		Fl_Button*			spotLT;
+		Fl_Button*			pointLT;
 
 		// we have other widgets as part of the sample solution
 		// this is not for 559 students to know about

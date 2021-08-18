@@ -82,9 +82,9 @@ class TrainView : public Fl_Gl_Window
 
 		void spotLight();
 
-		void pointLight();
-
 		void drawTrain(bool doingShadow);
+
+		void drawSleeper();
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
