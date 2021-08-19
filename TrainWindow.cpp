@@ -221,6 +221,6 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
-
+	
 	
 }

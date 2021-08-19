@@ -80,11 +80,9 @@ class TrainView : public Fl_Gl_Window
 
 		void Mult_Q(float* C, float M[][4], float* T);
 
-		void spotLight();
-
 		void drawTrain(bool doingShadow);
 
-		void drawSleeper();
+		double* rotate(float[][3], double* p);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
