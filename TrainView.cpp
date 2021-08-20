@@ -473,10 +473,16 @@ doPick()
 	printf("Selected Cube %d\n",selectedCube);
 }
 
-enum Type
+enum splineType
 {
 	LINEAR = 1, CARDINAL, B_SPLINE
 };
+
+enum trackType
+{
+	SIMPLE = 1, PARALLEL, ROAD
+};
+
 #define PI 3.14159265
 void TrainView::
 drawTrack(bool doingShadow)
@@ -509,13 +515,13 @@ drawTrack(bool doingShadow)
 
 		switch (splineType)
 		{
-		case Type::LINEAR:
+		case splineType::LINEAR:
 			qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
 			break;
-		case Type::CARDINAL:
+		case splineType::CARDINAL:
 			qt = cp_pos_p2;
 			break;
-		case Type::B_SPLINE:
+		case splineType::B_SPLINE:
 			qt = cp_pos_p1 * (1.0f / 6.0f) + cp_pos_p2 * (4.0f / 6.0f) + cp_pos_p3 * (1.0f / 6.0f);
 			break;
 		}
@@ -545,16 +551,16 @@ drawTrack(bool doingShadow)
 
 			switch (splineType)
 			{
-			case Type::LINEAR:
+			case splineType::LINEAR:
 				qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
 				orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
 				break;
-			case Type::CARDINAL:
+			case splineType::CARDINAL:
 				Mult_Q(C, M_cardinal, T);
 				qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 				orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
 				break;
-			case Type::B_SPLINE:
+			case splineType::B_SPLINE:
 				Mult_Q(C, M_b_spline, T);
 				qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 				orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
@@ -574,21 +580,43 @@ drawTrack(bool doingShadow)
 			cross_t.normalize();
 			cross_t = cross_t * 2.5f;
 
+			int trackType = tw->trackBrowser->value();
+
+			switch (trackType)
+			{
+			case trackType::SIMPLE:
+				glBegin(GL_LINES);
+				if (!doingShadow)
+					glColor3ub(40, 30, 40);
+				glVertex3f(qt0.x, qt0.y, qt0.z);
+				glVertex3f(qt1.x, qt1.y, qt1.z);
+				glEnd();
+				glLineWidth(1);
+				break;
+			case trackType::PARALLEL:
+				glBegin(GL_LINES);
+				if (!doingShadow)
+					glColor3ub(40, 30, 40);
+				glVertex3f(qt0.x + cross_t.x, qt0.y + cross_t.y, qt0.z + cross_t.z);
+				glVertex3f(qt1.x + cross_t.x, qt1.y + cross_t.y, qt1.z + cross_t.z);
+
+				glVertex3f(qt0.x - cross_t.x, qt0.y - cross_t.y, qt0.z - cross_t.z);
+				glVertex3f(qt1.x - cross_t.x, qt1.y - cross_t.y, qt1.z - cross_t.z);
+				glEnd();
+				glLineWidth(5);
+				break;
+			case trackType::ROAD:
+				glBegin(GL_LINES);
+				if (!doingShadow)
+					glColor3ub(40, 30, 40);
+				glVertex3f(qt0.x + cross_t.x, qt0.y + cross_t.y, qt0.z + cross_t.z);
+				glVertex3f(qt1.x - cross_t.x, qt1.y - cross_t.y, qt1.z - cross_t.z);
+				glEnd();
+				break;
+			}
+
 			
-			glBegin(GL_LINES);
-			if (!doingShadow)
-				glColor3ub(32, 32, 64);
-			glVertex3f(qt0.x + cross_t.x, qt0.y + cross_t.y, qt0.z + cross_t.z);
-			glVertex3f(qt1.x + cross_t.x, qt1.y + cross_t.y, qt1.z + cross_t.z);
-
-			glVertex3f(qt0.x - cross_t.x, qt0.y - cross_t.y, qt0.z - cross_t.z);
-			glVertex3f(qt1.x - cross_t.x, qt1.y - cross_t.y, qt1.z - cross_t.z);
-
-			/*glVertex3f(qt0.x, qt0.y, qt0.z);
-			glVertex3f(qt1.x, qt1.y, qt1.z);*/
-
-			glEnd();
-			glLineWidth(3);
+			
 
 			//draw Sleeper
 			distance += sqrtf(pow(sub.x, 2) + pow(sub.y, 2) + pow(sub.z, 2));
@@ -618,18 +646,6 @@ drawTrack(bool doingShadow)
 			if (distance > 8)
 			{
 				distance = 0;
-				/*glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(255, 255, 255);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3dv(v0);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3dv(v1);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3dv(v2);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3dv(v3);
-				glEnd();*/
 
 				//down
 				glBegin(GL_QUADS);
@@ -659,22 +675,61 @@ drawTrack(bool doingShadow)
 				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
 				glEnd();
 
-				//front
-				
-
-
-				/*glBegin(GL_QUADS);
+				//back
+				glBegin(GL_QUADS);
 				if (!doingShadow)
-					glColor3ub(0, 255, 255);
+					glColor3ub(100, 80, 100);
 				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt0.x - 1.5, qt0.y, qt0.z + 5);
+				glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
 				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt0.x + 1.5, qt0.y, qt0.z + 5);
+				glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
 				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt0.x + 1.5, qt0.y, qt0.z - 5);
+				glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt0.x - 1.5, qt0.y, qt0.z - 5);
-				glEnd();*/
+				glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
+				glEnd();
+
+				//front
+				glBegin(GL_QUADS);
+				if (!doingShadow)
+					glColor3ub(100, 80, 100);
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
+				glTexCoord2f(0.1f, 1.0f);
+				glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
+				glEnd();
+
+				//left
+				glBegin(GL_QUADS);
+				if (!doingShadow)
+					glColor3ub(100, 80, 100);
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
+				glTexCoord2f(0.1f, 1.0f);
+				glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
+				glEnd();
+
+				//right
+				glBegin(GL_QUADS);
+				if (!doingShadow)
+					glColor3ub(100, 80, 100);
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
+				glTexCoord2f(0.1f, 1.0f);
+				glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
+				glEnd();
 			}
 		}
 	}
@@ -714,13 +769,13 @@ drawTrain(bool doingShadow)
 
 		switch (splineType)
 		{
-		case Type::LINEAR:
+		case splineType::LINEAR:
 			qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
 			break;
-		case Type::CARDINAL:
+		case splineType::CARDINAL:
 			qt = cp_pos_p2;
 			break;
-		case Type::B_SPLINE:
+		case splineType::B_SPLINE:
 			qt = cp_pos_p1 * (1.0f / 6.0f) + cp_pos_p2 * (4.0f / 6.0f) + cp_pos_p3 * (1.0f / 6.0f);
 			break;
 		}

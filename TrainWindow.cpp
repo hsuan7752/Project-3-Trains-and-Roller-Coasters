@@ -150,6 +150,16 @@ TrainWindow(const int x, const int y)
 
 		pty += 25;
 
+		trackBrowser = new Fl_Browser(605, pty, 120, 75, "Track Type");
+		trackBrowser->type(2);		// select
+		trackBrowser->callback((Fl_Callback*)damageCB, this);
+		trackBrowser->add("Simple Track");
+		trackBrowser->add("Parallel Rails");
+		trackBrowser->add("Road Rail");
+		trackBrowser->select(2);
+
+		pty += 110;
+
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
@@ -222,5 +232,5 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 	
-	
+	trainView;
 }
