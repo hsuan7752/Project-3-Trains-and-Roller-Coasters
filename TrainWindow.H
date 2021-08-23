@@ -95,6 +95,9 @@ class TrainWindow : public Fl_Double_Window {
 
 		Fl_Browser*			trackBrowser;
 
+		Fl_Button*			add;
+		Fl_Button*			del;
+
 		// we have other widgets as part of the sample solution
 		// this is not for 559 students to know about
 #ifdef EXAMPLE_SOLUTION

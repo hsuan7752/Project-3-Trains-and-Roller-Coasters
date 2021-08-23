@@ -232,5 +232,7 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 	
-	trainView;
+	trainView->t_time += (dir / m_Track.points.size() / (trainView->DIVIDE_LINE / 40));
+	if (trainView->t_time > 1.0f)
+		trainView->t_time -= 1.0f;
 }

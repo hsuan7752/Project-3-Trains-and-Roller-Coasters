@@ -23,6 +23,7 @@
 // Preclarify to prevent the compiler error
 class TrainWindow;
 class Fl_Widget;
+class Train;
 
 // Reset the train window
 void resetCB(Fl_Widget*, TrainWindow* tw);

@@ -248,3 +248,7 @@ void rmzCB(Fl_Widget*, TrainWindow* tw)
 	rollz(tw, -1);
 }
 
+void addCar(Fl_Widget*, Train* train)
+{
+	
+}

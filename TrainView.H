@@ -50,6 +50,7 @@ class CTrack;
 
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
+#include "Utilities/Pnt3f.H"
 
 class TrainView : public Fl_Gl_Window
 {
@@ -82,7 +83,9 @@ class TrainView : public Fl_Gl_Window
 
 		void drawTrain(bool doingShadow);
 
-		double* rotate(float[][3], double* p);
+		double* rotate(float m[][3], double* p);
+
+		float* rotatef(float m[][3], float* p);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -90,4 +93,6 @@ class TrainView : public Fl_Gl_Window
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
+		float			t_time = 0.0f;
+		unsigned int	DIVIDE_LINE = 500;
 };
