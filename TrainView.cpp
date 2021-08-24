@@ -778,25 +778,30 @@ drawTrain(bool doingShadow)
 	Pnt3f cp_orient_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].orient;
 	Pnt3f cp_orient_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].orient;
 
+	float* vec;
+
 	switch (splineType)
 	{
 	case splineType::LINEAR:
 		qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
 		orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
+		vec = new float[3]{ cp_pos_p2.x - cp_pos_p1.x, cp_pos_p2.y - cp_pos_p1.y, cp_pos_p2.z - cp_pos_p1.z };
 		break;
 	case splineType::CARDINAL:
 		Mult_Q(C, M_cardinal, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+		vec = new float[3]{ 0 };
 		break;
 	case splineType::B_SPLINE:
 		Mult_Q(C, M_b_spline, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+		vec = new float[3]{ 0 };
 		break;
 	}
 
-	Train train(qt, orient_t, doingShadow);
+	Train train(qt, orient_t, vec, doingShadow);
 }
 
 double* TrainView::

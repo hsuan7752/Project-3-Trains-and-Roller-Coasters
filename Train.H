@@ -3,7 +3,7 @@
 class Train
 {
 public:
-	Train(Pnt3f pos, Pnt3f orient, bool doingShadow);
+	Train(Pnt3f pos, Pnt3f orient, float* vec, bool doingShadow);
 
 	Train(Pnt3f pos);
 
@@ -17,7 +17,7 @@ public:
 
 	void	firstCar(bool doingShadow);
 
-	Pnt3f	vec;
+	float*	rotatef(float m[][3], float* p);
 
 private:
 	Train*	next_car = nullptr;	
