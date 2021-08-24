@@ -1,5 +1,10 @@
 #pragma once
 #include "Utilities/Pnt3f.H"
+
+class TrainWindow;
+class TrainView;
+class CTrack;
+
 class Train
 {
 public:
@@ -7,20 +12,26 @@ public:
 
 	Train(Pnt3f pos);
 
-	void	add(bool doingShadow);
+	void			add(Pnt3f pos, Pnt3f orient, float* vec, bool doingShadow);
 
-	void	del();
+	void			del();
 
-	void	draw(bool doingShadow);
+	void			draw(bool doingShadow, float* vec);	
 
-	Pnt3f	pos;
+	void			firstCar(bool doingShadow);
 
-	void	firstCar(bool doingShadow);
-
-	float*	rotatef(float m[][3], float* p);
+	float*			rotatef(float m[][3], float* p);
 
 private:
-	Train*	next_car = nullptr;	
+	Pnt3f			pos;
 
-	Pnt3f	orient;
+	Pnt3f			orient;
+
+	Train*			next_car = nullptr;	
+
+	TrainView*		trainView;
+
+	TrainWindow*	tw;
+
+	CTrack*			m_pTrack;
 };

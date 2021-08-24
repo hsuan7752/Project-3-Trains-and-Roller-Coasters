@@ -45,6 +45,17 @@
 #	include "TrainExample/TrainExample.H"
 #endif
 
+enum splineType
+{
+	LINEAR = 1, CARDINAL, B_SPLINE
+};
+
+enum trackType
+{
+	SIMPLE = 1, PARALLEL, ROAD
+};
+
+
 float M_cardinal[4][4]{ { -0.5,  1.5, -1.5,  0.5 },
 									{    1, -2.5,    2, -0.5 },
 									{ -0.5,    0,  0.5,    0 },
@@ -361,10 +372,89 @@ setProjection()
 #ifdef EXAMPLE_SOLUTION
 		trainCamView(this,aspect);
 #endif
+		int splineType = -1;
+
+		splineType = tw->splineBrowser->value();
+
+		Pnt3f qt, orient_t;
+		Pnt3f new_qt, new_orient_t;
+
+		int side = t_time * m_pTrack->points.size();
+		float t = t_time * m_pTrack->points.size() - side;
+
+		float new_t_time = t_time + (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40);
+		if (new_t_time > 1.0f)
+			new_t_time -= 1.0f;
+
+		int new_side = new_t_time * m_pTrack->points.size();
+		float new_t = new_t_time * m_pTrack->points.size() - new_side;
+
+		float T[4]{ pow(t, 3), pow(t, 2), t, 1 };
+		float new_T[4]{ pow(new_t, 3), pow(new_t, 2), new_t, 1 };
+
+		float C[4]{ 0 };
+		float new_C[4]{ 0 };
+
+		//pos
+		Pnt3f cp_pos_p1 = m_pTrack->points[side].pos;
+		Pnt3f cp_pos_p2 = m_pTrack->points[(side + 1) % m_pTrack->points.size()].pos;
+		Pnt3f cp_pos_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].pos;
+		Pnt3f cp_pos_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].pos;
+		//orient
+		Pnt3f cp_orient_p1 = m_pTrack->points[side].orient;
+		Pnt3f cp_orient_p2 = m_pTrack->points[(side + 1) % m_pTrack->points.size()].orient;
+		Pnt3f cp_orient_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].orient;
+		Pnt3f cp_orient_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].orient;
+
+		//pos
+		Pnt3f new_cp_pos_p1 = m_pTrack->points[new_side].pos;
+		Pnt3f new_cp_pos_p2 = m_pTrack->points[(new_side + 1) % m_pTrack->points.size()].pos;
+		Pnt3f new_cp_pos_p3 = m_pTrack->points[(new_side + 2) % m_pTrack->points.size()].pos;
+		Pnt3f new_cp_pos_p4 = m_pTrack->points[(new_side + 3) % m_pTrack->points.size()].pos;
+		//orient
+		Pnt3f new_cp_orient_p1 = m_pTrack->points[new_side].orient;
+		Pnt3f new_cp_orient_p2 = m_pTrack->points[(new_side + 1) % m_pTrack->points.size()].orient;
+		Pnt3f new_cp_orient_p3 = m_pTrack->points[(new_side + 2) % m_pTrack->points.size()].orient;
+		Pnt3f new_cp_orient_p4 = m_pTrack->points[(new_side + 3) % m_pTrack->points.size()].orient;
+
+		Pnt3f forward, up;
+
+		switch (splineType)
+		{
+		case splineType::LINEAR:
+			qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
+			orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
+
+			new_qt = (1 - new_t) * new_cp_pos_p1 + new_t * new_cp_pos_p2;
+			break;
+		case splineType::CARDINAL:
+			Mult_Q(C, M_cardinal, T);
+			qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+			orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+
+			Mult_Q(new_C, M_cardinal, new_T);
+			new_qt = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+			break;
+		case splineType::B_SPLINE:
+			Mult_Q(C, M_b_spline, T);
+			qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+			orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+
+			Mult_Q(new_C, M_b_spline, new_T);
+			new_qt = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+			break;
+		}
+
+		orient_t.normalize();
+
+		Pnt3f cross_t = (new_qt - qt) * orient_t;
+		cross_t.normalize();
 
 		glMatrixMode(GL_MODELVIEW);
-
+		glLoadIdentity();
+		gluLookAt(qt.x, qt.y + 2.0f, qt.z, new_qt.x, new_qt.y, new_qt.z, 0.0f, 1.0f, 0.0f);
 		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 		gluPerspective(60, aspect, 1.0, 200.0);
 	}
 }
@@ -493,16 +583,6 @@ doPick()
 	printf("Selected Cube %d\n",selectedCube);
 }
 
-enum splineType
-{
-	LINEAR = 1, CARDINAL, B_SPLINE
-};
-
-enum trackType
-{
-	SIMPLE = 1, PARALLEL, ROAD
-};
-
 #define PI 3.14159265
 void TrainView::
 drawTrack(bool doingShadow)
@@ -579,12 +659,7 @@ drawTrack(bool doingShadow)
 
 			orient_t.normalize();
 
-			Pnt3f sub;
-			sub.x = qt1.x - qt0.x;
-			sub.y = qt1.y - qt0.y;
-			sub.z = qt1.z - qt0.z;
-
-			Pnt3f cross_t = sub * orient_t;
+			Pnt3f cross_t = (qt1 - qt0) * orient_t;
 			cross_t.normalize();
 			cross_t = cross_t * 2.5f;
 
@@ -621,35 +696,74 @@ drawTrack(bool doingShadow)
 				glVertex3f(qt1.x - cross_t.x, qt1.y - cross_t.y, qt1.z - cross_t.z);
 				glEnd();
 				break;
-			}
-
-			
-			
+			}		
 
 			//draw Sleeper
-			distance += sqrtf(pow(sub.x, 2) + pow(sub.y, 2) + pow(sub.z, 2));
+			distance += sqrtf(pow(qt1.x - qt0.x, 2) + pow(qt1.y - qt0.y, 2) + pow(qt1.z - qt0.z, 2));
 
-			Pnt3f AC(qt1.x - qt0.x, qt1.y - qt0.y, qt1.z - qt0.z);
-			Pnt3f AB(1.0f, 0.0f, 0.0f);
+			double* v0 = new double[3]{ -1.5, 0, +5 };
+			double* v1 = new double[3]{ +1.5, 0, +5 };
+			double* v2 = new double[3]{ +1.5, 0, -5 };
+			double* v3 = new double[3]{ -1.5, 0, -5 };
+			
+			Pnt3f AC, AB;
+			
 
-			float cos_y = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z) 
-									/ abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2)));
+			AC = Pnt3f(orient_t.x, orient_t.y, 0);
+			AB = Pnt3f(0.0f, 1.0f, 0.0f);
+
+			float cos_x = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
+				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
+			float sin_x = (float)sqrt(1 - pow(cos_x, 2));
+
+			float rotationMatrix_x[3][3] = { { 1, 0, 0 },
+										  { 0, cos_x, -sin_x },
+										  { 0, sin_x, cos_x } };
+			sin_x = -sin_x;
+			if ((AC.x > 0 && AC.y > 0))
+				sin_x = -sin_x;
+
+			v0 = rotate(rotationMatrix_x, v0);
+			v1 = rotate(rotationMatrix_x, v1);
+			v2 = rotate(rotationMatrix_x, v2);
+			v3 = rotate(rotationMatrix_x, v3);
+
+
+			/*AC = Pnt3f(cross_t.x, cross_t.y, 0);
+			AB = Pnt3f(0.0f, 1.0f, 0.0f);
+
+			float cos_z = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
+				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
+			float sin_z = (float)sqrt(1 - pow(cos_z, 2));
+			if ((AC.y < 0 && AC.x > 0) || (AC.y > 0 && AC.x > 0))
+				sin_z = -sin_z;
+
+			float rotationMatrix_z[3][3] = { { cos_z, -sin_z, 0 },
+										  { sin_z, cos_z, 0 },
+										  { 0, 0, 1 } };
+
+			v0 = rotate(rotationMatrix_z, v0);
+			v1 = rotate(rotationMatrix_z, v1);
+			v2 = rotate(rotationMatrix_z, v2);
+			v3 = rotate(rotationMatrix_z, v3);*/
+
+			AC = Pnt3f(qt1.x - qt0.x, qt1.y - qt0.y, qt1.z - qt0.z);
+			AB = Pnt3f(1.0f, 0.0f, 0.0f);
+
+			float cos_y = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
+				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
 			float sin_y = (float)sqrt(1 - pow(cos_y, 2));
 			if ((AC.x < 0 && AC.z > 0) || (AC.x > 0 && AC.z > 0))
 				sin_y = -sin_y;
 
-			float rotationMatrix[3][3] = { { cos_y, 0, sin_y },
+			float rotationMatrix_y[3][3] = { { cos_y, 0, sin_y },
 										  { 0, 1, 0 },
 										  { -sin_y, 0, cos_y } };
-			double* v0 = new double[3]{ - 1.5, 0, + 5 };
-			double* v1 = new double[3]{ + 1.5, 0, + 5 };
-			double* v2 = new double[3]{ + 1.5, 0, - 5 };
-			double* v3 = new double[3]{ - 1.5, 0, - 5 };
 
-			v0 = rotate(rotationMatrix, v0);
-			v1 = rotate(rotationMatrix, v1);
-			v2 = rotate(rotationMatrix, v2);
-			v3 = rotate(rotationMatrix, v3);
+			v0 = rotate(rotationMatrix_y, v0);
+			v1 = rotate(rotationMatrix_y, v1);
+			v2 = rotate(rotationMatrix_y, v2);
+			v3 = rotate(rotationMatrix_y, v3);
 
 			if (distance > 8)
 			{
@@ -755,6 +869,7 @@ void TrainView::
 drawTrain(bool doingShadow)
 {
 	Pnt3f qt, orient_t;
+	Pnt3f qt0, orient_t0;
 
 	int splineType = -1;
 
@@ -762,10 +877,17 @@ drawTrain(bool doingShadow)
 
 	int side = t_time * m_pTrack->points.size();
 	float t = t_time * m_pTrack->points.size() - side;
+	float new_t_time = t_time + (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40);
+	if (new_t_time > 1.0f)
+		new_t_time -= 1.0f;
+	int side0 = new_t_time * m_pTrack->points.size();
+	float t0 = new_t_time * m_pTrack->points.size() - side0;
 
 	float T[4]{ pow(t, 3), pow(t, 2), t, 1 };
+	float T0[4]{ pow(t0, 3), pow(t0, 2), t0, 1 };
 
 	float C[4]{ 0 };
+	float new_C[4]{ 0 };
 
 	//pos
 	Pnt3f cp_pos_p1 = m_pTrack->points[side].pos;
@@ -777,6 +899,18 @@ drawTrain(bool doingShadow)
 	Pnt3f cp_orient_p2 = m_pTrack->points[(side + 1) % m_pTrack->points.size()].orient;
 	Pnt3f cp_orient_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].orient;
 	Pnt3f cp_orient_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].orient;
+
+	//pos
+	Pnt3f new_cp_pos_p1 = m_pTrack->points[side0].pos;
+	Pnt3f new_cp_pos_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].pos;
+	Pnt3f new_cp_pos_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].pos;
+	Pnt3f new_cp_pos_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].pos;
+	//orient
+	Pnt3f new_cp_orient_p1 = m_pTrack->points[side0].orient;
+	Pnt3f new_cp_orient_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].orient;
+	Pnt3f new_cp_orient_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].orient;
+	Pnt3f new_cp_orient_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].orient;
+
 
 	float* vec;
 
@@ -791,17 +925,96 @@ drawTrain(bool doingShadow)
 		Mult_Q(C, M_cardinal, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
-		vec = new float[3]{ 0 };
+
+		Mult_Q(new_C, M_cardinal, T0);
+		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+		orient_t0 = new_cp_orient_p1 * new_C[0] + new_cp_orient_p2 * new_C[1] + new_cp_orient_p3 * new_C[2] + new_cp_orient_p4 * new_C[3];
+
+		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
 		break;
 	case splineType::B_SPLINE:
 		Mult_Q(C, M_b_spline, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
-		vec = new float[3]{ 0 };
+
+		Mult_Q(new_C, M_b_spline, T0);
+		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+		orient_t0 = new_cp_orient_p1 * new_C[0] + new_cp_orient_p2 * new_C[1] + new_cp_orient_p3 * new_C[2] + new_cp_orient_p4 * new_C[3];
+
+		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
 		break;
 	}
 
 	Train train(qt, orient_t, vec, doingShadow);
+
+	new_t_time = t_time - (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40) * 2;
+	if (new_t_time < 0.0f)
+		new_t_time += 1.0f;
+	side = new_t_time * m_pTrack->points.size();
+	t = new_t_time * m_pTrack->points.size() - side;
+
+	cp_pos_p1 = m_pTrack->points[side].pos;
+	cp_pos_p2 = m_pTrack->points[(side + 1) % m_pTrack->points.size()].pos;
+	cp_pos_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].pos;
+	cp_pos_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].pos;
+
+	new_t_time = t_time + (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40);
+	if (new_t_time > 1.0f)
+		new_t_time -= 1.0f;
+	side0 = new_t_time * m_pTrack->points.size();
+	t0 = new_t_time * m_pTrack->points.size() - side0;
+
+	T[0] = pow(t, 3);
+	T[1] = pow(t, 2);
+	T[2] = t;
+	T[3] = 1;
+
+	T0[0] = pow(t0, 3);
+	T0[1] = pow(t0, 2);
+	T0[2] = t0;
+	T0[3] = 1;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		C[i] = 0;
+		new_C[i] = 0;
+	}
+
+	new_cp_orient_p1 = m_pTrack->points[side0].orient;
+	new_cp_orient_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].orient;
+	new_cp_orient_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].orient;
+	new_cp_orient_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].orient;
+
+	switch (splineType)
+	{
+	case splineType::LINEAR:
+		qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
+		orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
+		vec = new float[3]{ cp_pos_p2.x - cp_pos_p1.x, cp_pos_p2.y - cp_pos_p1.y, cp_pos_p2.z - cp_pos_p1.z };
+		break;
+	case splineType::CARDINAL:
+		Mult_Q(C, M_cardinal, T);
+		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+
+		Mult_Q(new_C, M_cardinal, T0);
+		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+		
+		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
+		break;
+	case splineType::B_SPLINE:
+		Mult_Q(C, M_b_spline, T);
+		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
+		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
+
+		Mult_Q(new_C, M_b_spline, T0);
+		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
+		
+		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
+		break;
+	}
+
+	train.add(qt, orient_t, vec, doingShadow);
 }
 
 double* TrainView::
