@@ -708,50 +708,14 @@ drawTrack(bool doingShadow)
 			
 			Pnt3f AC, AB;
 			
-
-			AC = Pnt3f(orient_t.x, orient_t.y, 0);
-			AB = Pnt3f(0.0f, 1.0f, 0.0f);
-
-			float cos_x = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
-				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
-			float sin_x = (float)sqrt(1 - pow(cos_x, 2));
-
-			float rotationMatrix_x[3][3] = { { 1, 0, 0 },
-										  { 0, cos_x, -sin_x },
-										  { 0, sin_x, cos_x } };
-			sin_x = -sin_x;
-			if ((AC.x > 0 && AC.y > 0))
-				sin_x = -sin_x;
-
-			v0 = rotate(rotationMatrix_x, v0);
-			v1 = rotate(rotationMatrix_x, v1);
-			v2 = rotate(rotationMatrix_x, v2);
-			v3 = rotate(rotationMatrix_x, v3);
-
-
-			/*AC = Pnt3f(cross_t.x, cross_t.y, 0);
-			AB = Pnt3f(0.0f, 1.0f, 0.0f);
-
-			float cos_z = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
-				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
-			float sin_z = (float)sqrt(1 - pow(cos_z, 2));
-			if ((AC.y < 0 && AC.x > 0) || (AC.y > 0 && AC.x > 0))
-				sin_z = -sin_z;
-
-			float rotationMatrix_z[3][3] = { { cos_z, -sin_z, 0 },
-										  { sin_z, cos_z, 0 },
-										  { 0, 0, 1 } };
-
-			v0 = rotate(rotationMatrix_z, v0);
-			v1 = rotate(rotationMatrix_z, v1);
-			v2 = rotate(rotationMatrix_z, v2);
-			v3 = rotate(rotationMatrix_z, v3);*/
-
 			AC = Pnt3f(qt1.x - qt0.x, qt1.y - qt0.y, qt1.z - qt0.z);
 			AB = Pnt3f(1.0f, 0.0f, 0.0f);
 
 			float cos_y = (float)(AC.x * AB.x + AC.y * AB.y + AC.z * AB.z)
 				/ (abs(sqrt(pow(AC.x, 2) + pow(AC.y, 2) + pow(AC.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
+			
+			float angle = acos(cos_y) * PI / 180.0;
+
 			float sin_y = (float)sqrt(1 - pow(cos_y, 2));
 			if ((AC.x < 0 && AC.z > 0) || (AC.x > 0 && AC.z > 0))
 				sin_y = -sin_y;
@@ -768,90 +732,99 @@ drawTrack(bool doingShadow)
 			if (distance > 8)
 			{
 				distance = 0;
+				
+				glPushMatrix();
+				glTranslatef(qt1.x, qt1.y, qt1.z);
+				glRotatef(angle * PI / 180.0, 0.0f, 1.0f, 0.0f);
+				drawSleeper(doingShadow);
+				glPopMatrix();
 
 				//down
+				glPushMatrix();
+				glTranslatef(qt1.x, qt1.y, qt1.z);
 				glBegin(GL_QUADS);
 				if (!doingShadow)
 					glColor3ub(100, 80, 100);
 				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
+				glVertex3f(v0[0], v0[1], v0[2]);
 				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
+				glVertex3f(v1[0], v1[1], v1[2]);
 				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
+				glVertex3f(v2[0], v2[1], v2[2]);
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
+				glVertex3f(v3[0], v3[1], v3[2]);
 				glEnd();
+				glPopMatrix();
 
-				//up
-				glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(100, 80, 100);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				glEnd();
+				////up
+				//glBegin(GL_QUADS);
+				//if (!doingShadow)
+				//	glColor3ub(100, 80, 100);
+				//glTexCoord2f(0.0f, 0.0f);
+				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
+				//glTexCoord2f(0.1f, 1.0f);
+				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
+				//glTexCoord2f(1.0f, 1.0f);
+				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
+				//glTexCoord2f(1.0f, 0.0f);
+				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
+				//glEnd();
 
-				//back
-				glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(100, 80, 100);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				glEnd();
+				////back
+				//glBegin(GL_QUADS);
+				//if (!doingShadow)
+				//	glColor3ub(100, 80, 100);
+				//glTexCoord2f(0.0f, 0.0f);
+				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
+				//glTexCoord2f(0.1f, 1.0f);
+				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
+				//glTexCoord2f(1.0f, 1.0f);
+				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
+				//glTexCoord2f(1.0f, 0.0f);
+				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
+				//glEnd();
 
-				//front
-				glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(100, 80, 100);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				glEnd();
+				////front
+				//glBegin(GL_QUADS);
+				//if (!doingShadow)
+				//	glColor3ub(100, 80, 100);
+				//glTexCoord2f(0.0f, 0.0f);
+				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
+				//glTexCoord2f(0.1f, 1.0f);
+				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
+				//glTexCoord2f(1.0f, 1.0f);
+				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
+				//glTexCoord2f(1.0f, 0.0f);
+				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
+				//glEnd();
 
-				//left
-				glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(100, 80, 100);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				glEnd();
+				////left
+				//glBegin(GL_QUADS);
+				//if (!doingShadow)
+				//	glColor3ub(100, 80, 100);
+				//glTexCoord2f(0.0f, 0.0f);
+				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
+				//glTexCoord2f(0.1f, 1.0f);
+				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
+				//glTexCoord2f(1.0f, 1.0f);
+				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
+				//glTexCoord2f(1.0f, 0.0f);
+				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
+				//glEnd();
 
-				//right
-				glBegin(GL_QUADS);
-				if (!doingShadow)
-					glColor3ub(100, 80, 100);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
-				glTexCoord2f(0.1f, 1.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				glEnd();
+				////right
+				//glBegin(GL_QUADS);
+				//if (!doingShadow)
+				//	glColor3ub(100, 80, 100);
+				//glTexCoord2f(0.0f, 0.0f);
+				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
+				//glTexCoord2f(0.1f, 1.0f);
+				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
+				//glTexCoord2f(1.0f, 1.0f);
+				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
+				//glTexCoord2f(1.0f, 0.0f);
+				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
+				//glEnd();
 			}
 		}
 	}
@@ -1036,4 +1009,22 @@ rotatef(float m[][3], float* p)
 			n[i] += m[i][j] * p[j];
 
 	return n;
+}
+
+void TrainView::
+drawSleeper(bool doingShadow)
+{
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		//glColor3ub(100, 80, 100);
+		glColor3ub(255, 255, 255);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.5, 0, 5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(1.5, 0, 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.5, 0, -5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.5, 0, -5);
+	glEnd();
 }

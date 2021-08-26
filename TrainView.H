@@ -65,27 +65,29 @@ class TrainView : public Fl_Gl_Window
 		// all of the actual drawing happens in this routine
 		// it has to be encapsulated, since we draw differently if
 		// we're drawing shadows (no colors, for example)
-		void drawStuff(bool doingShadows=false);
+		void	drawStuff(bool doingShadows=false);
 
 		// setup the projection - assuming that the projection stack has been
 		// cleared for you
-		void setProjection();
+		void	setProjection();
 
 		// Reset the Arc ball control
-		void resetArcball();
+		void	resetArcball();
 
 		// pick a point (for when the mouse goes down)
-		void doPick();
+		void	doPick();
 
-		void drawTrack(bool doingShadow);
+		void	drawTrack(bool doingShadow);
 
-		void Mult_Q(float* C, float M[][4], float* T);
+		void	Mult_Q(float* C, float M[][4], float* T);
 
-		void drawTrain(bool doingShadow);
+		void	drawTrain(bool doingShadow);
 
-		double* rotate(float m[][3], double* p);
+		double*		rotate(float m[][3], double* p);
 
-		float* rotatef(float m[][3], float* p);
+		float*	rotatef(float m[][3], float* p);
+
+		void	drawSleeper(bool doingShadow);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
