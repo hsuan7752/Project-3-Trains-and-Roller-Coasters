@@ -89,6 +89,8 @@ class TrainView : public Fl_Gl_Window
 
 		void	drawSleeper(bool doingShadow);
 
+		void	drawCar(bool doingShadow);
+
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
