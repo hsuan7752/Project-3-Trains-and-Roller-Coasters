@@ -452,7 +452,7 @@ setProjection()
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt(qt.x, qt.y + 2.0f, qt.z, new_qt.x, new_qt.y, new_qt.z, 0.0f, 1.0f, 0.0f);
+		gluLookAt(qt.x, qt.y + 3.0f, qt.z, new_qt.x, new_qt.y, new_qt.z, 0.0f, 1.0f, 0.0f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(60, aspect, 1.0, 200.0);
@@ -700,11 +700,6 @@ drawTrack(bool doingShadow)
 
 			//draw Sleeper
 			distance += sqrtf(pow(qt1.x - qt0.x, 2) + pow(qt1.y - qt0.y, 2) + pow(qt1.z - qt0.z, 2));
-
-			double* v0 = new double[3]{ -1.5, 0, +5 };
-			double* v1 = new double[3]{ +1.5, 0, +5 };
-			double* v2 = new double[3]{ +1.5, 0, -5 };
-			double* v3 = new double[3]{ -1.5, 0, -5 };
 			
 			Pnt3f AC, AB;
 			
@@ -716,18 +711,8 @@ drawTrack(bool doingShadow)
 			
 			float angle = acos(cos_y) * 180.0 / PI;
 
-			float sin_y = (float)sqrt(1 - pow(cos_y, 2));
 			if ((AC.x < 0 && AC.z > 0) || (AC.x > 0 && AC.z > 0))
 				angle = -angle;
-
-			float rotationMatrix_y[3][3] = { { cos_y, 0, sin_y },
-										  { 0, 1, 0 },
-										  { -sin_y, 0, cos_y } };
-
-			v0 = rotate(rotationMatrix_y, v0);
-			v1 = rotate(rotationMatrix_y, v1);
-			v2 = rotate(rotationMatrix_y, v2);
-			v3 = rotate(rotationMatrix_y, v3);
 
 			if (distance > 8)
 			{
@@ -738,93 +723,6 @@ drawTrack(bool doingShadow)
 				glRotatef(angle, 0.0f, 1.0f, 0.0f);
 				drawSleeper(doingShadow);
 				glPopMatrix();
-
-				////down
-				//glPushMatrix();
-				//glTranslatef(qt1.x, qt1.y, qt1.z);
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(v0[0], v0[1], v0[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(v1[0], v1[1], v1[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(v2[0], v2[1], v2[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(v3[0], v3[1], v3[2]);
-				//glEnd();
-				//glPopMatrix();
-
-				////up
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				//glEnd();
-
-				////back
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				//glEnd();
-
-				////front
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				//glEnd();
-
-				////left
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1], qt1.z + v0[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1], qt1.z + v3[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(qt1.x + v3[0], qt1.y + v3[1] + 0.5, qt1.z + v3[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(qt1.x + v0[0], qt1.y + v0[1] + 0.5, qt1.z + v0[2]);
-				//glEnd();
-
-				////right
-				//glBegin(GL_QUADS);
-				//if (!doingShadow)
-				//	glColor3ub(100, 80, 100);
-				//glTexCoord2f(0.0f, 0.0f);
-				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1], qt1.z + v1[2]);
-				//glTexCoord2f(0.1f, 1.0f);
-				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1], qt1.z + v2[2]);
-				//glTexCoord2f(1.0f, 1.0f);
-				//glVertex3f(qt1.x + v2[0], qt1.y + v2[1] + 0.5, qt1.z + v2[2]);
-				//glTexCoord2f(1.0f, 0.0f);
-				//glVertex3f(qt1.x + v1[0], qt1.y + v1[1] + 0.5, qt1.z + v1[2]);
-				//glEnd();
 			}
 		}
 	}
@@ -850,17 +748,11 @@ drawTrain(bool doingShadow)
 
 	int side = t_time * m_pTrack->points.size();
 	float t = t_time * m_pTrack->points.size() - side;
-	float new_t_time = t_time + (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40);
-	if (new_t_time > 1.0f)
-		new_t_time -= 1.0f;
-	int side0 = new_t_time * m_pTrack->points.size();
-	float t0 = new_t_time * m_pTrack->points.size() - side0;
 
 	float T[4]{ pow(t, 3), pow(t, 2), t, 1 };
-	float T0[4]{ pow(t0, 3), pow(t0, 2), t0, 1 };
 
 	float C[4]{ 0 };
-	float new_C[4]{ 0 };
+	float* dif = new float[4]{ 0 };
 
 	//pos
 	Pnt3f cp_pos_p1 = m_pTrack->points[side].pos;
@@ -873,121 +765,57 @@ drawTrain(bool doingShadow)
 	Pnt3f cp_orient_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].orient;
 	Pnt3f cp_orient_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].orient;
 
-	//pos
-	Pnt3f new_cp_pos_p1 = m_pTrack->points[side0].pos;
-	Pnt3f new_cp_pos_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].pos;
-	Pnt3f new_cp_pos_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].pos;
-	Pnt3f new_cp_pos_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].pos;
-	//orient
-	Pnt3f new_cp_orient_p1 = m_pTrack->points[side0].orient;
-	Pnt3f new_cp_orient_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].orient;
-	Pnt3f new_cp_orient_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].orient;
-	Pnt3f new_cp_orient_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].orient;
+	Pnt3f tangent;
 
+	Pnt3f AC, AB;
 
-	float* vec;
+	AB = Pnt3f(1.0f, 0.0f, 0.0f);
+
+	float cos_y = 0.0f;
+
+	float angle = 0.0f;
 
 	switch (splineType)
 	{
 	case splineType::LINEAR:
 		qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
 		orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
-		vec = new float[3]{ cp_pos_p2.x - cp_pos_p1.x, cp_pos_p2.y - cp_pos_p1.y, cp_pos_p2.z - cp_pos_p1.z };
+
+		tangent = Pnt3f( cp_pos_p2.x - cp_pos_p1.x, cp_pos_p2.y - cp_pos_p1.y, cp_pos_p2.z - cp_pos_p1.z );		
 		break;
 	case splineType::CARDINAL:
 		Mult_Q(C, M_cardinal, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
 
-		Mult_Q(new_C, M_cardinal, T0);
-		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
-		orient_t0 = new_cp_orient_p1 * new_C[0] + new_cp_orient_p2 * new_C[1] + new_cp_orient_p3 * new_C[2] + new_cp_orient_p4 * new_C[3];
+		differential(dif, M_cardinal, t);
 
-		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
+		tangent = cp_pos_p1 * dif[0] + cp_pos_p2 * dif[1] + cp_pos_p3 * dif[2] + cp_pos_p4 * dif[3];
 		break;
 	case splineType::B_SPLINE:
 		Mult_Q(C, M_b_spline, T);
 		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
 		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
 
-		Mult_Q(new_C, M_b_spline, T0);
-		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
-		orient_t0 = new_cp_orient_p1 * new_C[0] + new_cp_orient_p2 * new_C[1] + new_cp_orient_p3 * new_C[2] + new_cp_orient_p4 * new_C[3];
+		differential(dif, M_b_spline, t);
 
-		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
+		tangent = cp_pos_p1 * dif[0] + cp_pos_p2 * dif[1] + cp_pos_p3 * dif[2] + cp_pos_p4 * dif[3];
 		break;
 	}
 
-	Train train(qt, orient_t, vec, doingShadow);
+	cos_y = (float)(tangent.x * AB.x + tangent.y * AB.y + tangent.z * AB.z)
+		/ (abs(sqrt(pow(tangent.x, 2) + pow(tangent.y, 2) + pow(tangent.z, 2))) * abs(sqrt(pow(AB.x, 2) + pow(AB.y, 2) + pow(AB.z, 2))));
 
-	new_t_time = t_time - (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40) * 2;
-	if (new_t_time < 0.0f)
-		new_t_time += 1.0f;
-	side = new_t_time * m_pTrack->points.size();
-	t = new_t_time * m_pTrack->points.size() - side;
+	angle = acos(cos_y) * 180.0 / PI;
+	if ((tangent.x < 0 && tangent.z > 0) || (tangent.x > 0 && tangent.z > 0))
+		angle = -angle;
 
-	cp_pos_p1 = m_pTrack->points[side].pos;
-	cp_pos_p2 = m_pTrack->points[(side + 1) % m_pTrack->points.size()].pos;
-	cp_pos_p3 = m_pTrack->points[(side + 2) % m_pTrack->points.size()].pos;
-	cp_pos_p4 = m_pTrack->points[(side + 3) % m_pTrack->points.size()].pos;
+	glPushMatrix();
+	glTranslatef(qt.x, qt.y, qt.z);
+	glRotatef(angle, 0.0f, 1.0f, 0.0f);
+	drawCar(doingShadow);
+	glPopMatrix();
 
-	new_t_time = t_time + (float)1 / m_pTrack->points.size() / (DIVIDE_LINE / 40);
-	if (new_t_time > 1.0f)
-		new_t_time -= 1.0f;
-	side0 = new_t_time * m_pTrack->points.size();
-	t0 = new_t_time * m_pTrack->points.size() - side0;
-
-	T[0] = pow(t, 3);
-	T[1] = pow(t, 2);
-	T[2] = t;
-	T[3] = 1;
-
-	T0[0] = pow(t0, 3);
-	T0[1] = pow(t0, 2);
-	T0[2] = t0;
-	T0[3] = 1;
-
-	for (int i = 0; i < 4; ++i)
-	{
-		C[i] = 0;
-		new_C[i] = 0;
-	}
-
-	new_cp_orient_p1 = m_pTrack->points[side0].orient;
-	new_cp_orient_p2 = m_pTrack->points[(side0 + 1) % m_pTrack->points.size()].orient;
-	new_cp_orient_p3 = m_pTrack->points[(side0 + 2) % m_pTrack->points.size()].orient;
-	new_cp_orient_p4 = m_pTrack->points[(side0 + 3) % m_pTrack->points.size()].orient;
-
-	switch (splineType)
-	{
-	case splineType::LINEAR:
-		qt = (1 - t) * cp_pos_p1 + t * cp_pos_p2;
-		orient_t = (1 - t) * cp_orient_p1 + t * cp_orient_p2;
-		vec = new float[3]{ cp_pos_p2.x - cp_pos_p1.x, cp_pos_p2.y - cp_pos_p1.y, cp_pos_p2.z - cp_pos_p1.z };
-		break;
-	case splineType::CARDINAL:
-		Mult_Q(C, M_cardinal, T);
-		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
-		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
-
-		Mult_Q(new_C, M_cardinal, T0);
-		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
-		
-		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
-		break;
-	case splineType::B_SPLINE:
-		Mult_Q(C, M_b_spline, T);
-		qt = cp_pos_p1 * C[0] + cp_pos_p2 * C[1] + cp_pos_p3 * C[2] + cp_pos_p4 * C[3];
-		orient_t = cp_orient_p1 * C[0] + cp_orient_p2 * C[1] + cp_orient_p3 * C[2] + cp_orient_p4 * C[3];
-
-		Mult_Q(new_C, M_b_spline, T0);
-		qt0 = new_cp_pos_p1 * new_C[0] + new_cp_pos_p2 * new_C[1] + new_cp_pos_p3 * new_C[2] + new_cp_pos_p4 * new_C[3];
-		
-		vec = new float[3]{ qt0.x - qt.x, qt0.y - qt.y, qt0.z - qt.z };
-		break;
-	}
-
-	train.add(qt, orient_t, vec, doingShadow);
 }
 
 double* TrainView::
@@ -1014,10 +842,10 @@ rotatef(float m[][3], float* p)
 void TrainView::
 drawSleeper(bool doingShadow)
 {
+	//Down
 	glBegin(GL_QUADS);
 	if (!doingShadow)
-		//glColor3ub(100, 80, 100);
-		glColor3ub(255, 255, 255);
+		glColor3ub(100, 80, 100);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-1.5, 0, 5);
 	glTexCoord2f(0.1f, 1.0f);
@@ -1026,5 +854,189 @@ drawSleeper(bool doingShadow)
 	glVertex3f(1.5, 0, -5);
 	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(-1.5, 0, -5);
+	glEnd();
+
+	//Up
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(100, 80, 100);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.5, 1, 5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(1.5, 1, 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.5, 1, -5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.5, 1, -5);
+	glEnd();
+
+	//Left
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(100, 80, 100);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.5, 0, 5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(-1.5, 1, 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-1.5, 1, -5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.5, 0, -5);
+	glEnd();
+
+	//Right
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(100, 80, 100);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(1.5, 0, 5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(1.5, 1, 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.5, 1, -5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(1.5, 0, -5);
+	glEnd();
+
+	//Front
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(100, 80, 100);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.5, 1, 5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(1.5, 1, 5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.5, 0, 5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.5, 0, 5);
+	glEnd();
+
+	//Front
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(100, 80, 100);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.5, 1, -5);
+	glTexCoord2f(0.1f, 1.0f);
+	glVertex3f(1.5, 1, -5);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.5, 0, -5);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.5, 0, -5);
+	glEnd();
+}
+
+void TrainView::
+drawCar(bool doingShadow)
+{
+	//Up
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-5, 7, 3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(5, 7, 3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(5, 7, -3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-5, 7, -3);
+	glEnd();
+
+	//Down
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-5, 2, 3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(5, 2, 3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(5, 2, -3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-5, 2, -3);
+	glEnd();
+
+	//Left
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-5, 7, 3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-5, 2, 3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-5, 2, -3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-5, 7, -3);
+	glEnd();
+
+	//Right
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(5, 7, 3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(5, 2, 3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(5, 2, -3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(5, 7, -3);
+	glEnd();
+
+	//Front
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(5, 7, 3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(5, 2, 3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-5, 2, 3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-5, 7, 3);
+	glEnd();
+
+	//Front
+	glBegin(GL_QUADS);
+	if (!doingShadow)
+		glColor3ub(200, 180, 150);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(5, 7, -3);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(5, 2, -3);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-5, 2, -3);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-5, 7, -3);
+	glEnd();
+}
+
+void  TrainView::
+differential(float* C, float M[][4], float t)
+{	
+	float T[4]{ 3 * pow(t, 2), 2 * t, 1, 0 };
+
+	for (int i = 0; i < 4; ++i)
+		for (int j = 0; j < 4; ++j)
+			C[i] += M[j][i] * T[j];
+}
+
+void TrainView::
+drawWheel(bool doingShadow)
+{
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+	float r = 5.0f;
+
+	glBegin(GL_TRIANGLE_FAN);
+
+	glVertex3f(x, y, z);
+
+	/*for (int i = 0; i < 360; ++i)
+		glVertex3f(r * , y, );*/
+
 	glEnd();
 }
