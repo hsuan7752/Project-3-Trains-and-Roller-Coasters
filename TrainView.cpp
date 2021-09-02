@@ -811,11 +811,10 @@ drawTrain(bool doingShadow)
 		angle = -angle;
 
 	glPushMatrix();
-	glTranslatef(qt.x, qt.y, qt.z);
+	glTranslatef(qt.x, qt.y + 2.5f, qt.z);
 	glRotatef(angle, 0.0f, 1.0f, 0.0f);
 	drawCar(doingShadow);
 	glPopMatrix();
-
 }
 
 double* TrainView::
@@ -935,13 +934,13 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-5, 7, 3);
+	glVertex3f(-5, 5, 3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(5, 7, 3);
+	glVertex3f(5, 5, 3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(5, 7, -3);
+	glVertex3f(5, 5, -3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-5, 7, -3);
+	glVertex3f(-5, 5, -3);
 	glEnd();
 
 	//Down
@@ -949,13 +948,13 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-5, 2, 3);
+	glVertex3f(-5, 0, 3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(5, 2, 3);
+	glVertex3f(5, 0, 3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(5, 2, -3);
+	glVertex3f(5, 0, -3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-5, 2, -3);
+	glVertex3f(-5, 0, -3);
 	glEnd();
 
 	//Left
@@ -963,13 +962,13 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-5, 7, 3);
+	glVertex3f(-5, 5, 3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-5, 2, 3);
+	glVertex3f(-5, 0, 3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(-5, 2, -3);
+	glVertex3f(-5, 0, -3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-5, 7, -3);
+	glVertex3f(-5, 5, -3);
 	glEnd();
 
 	//Right
@@ -977,13 +976,13 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(5, 7, 3);
+	glVertex3f(5, 5, 3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(5, 2, 3);
+	glVertex3f(5, 0, 3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(5, 2, -3);
+	glVertex3f(5, 0, -3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(5, 7, -3);
+	glVertex3f(5, 5, -3);
 	glEnd();
 
 	//Front
@@ -991,13 +990,13 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(5, 7, 3);
+	glVertex3f(5, 5, 3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(5, 2, 3);
+	glVertex3f(5, 0, 3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(-5, 2, 3);
+	glVertex3f(-5, 0, 3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-5, 7, 3);
+	glVertex3f(-5, 5, 3);
 	glEnd();
 
 	//Front
@@ -1005,14 +1004,38 @@ drawCar(bool doingShadow)
 	if (!doingShadow)
 		glColor3ub(200, 180, 150);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(5, 7, -3);
+	glVertex3f(5, 5, -3);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(5, 2, -3);
+	glVertex3f(5, 0, -3);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(-5, 2, -3);
+	glVertex3f(-5, 0, -3);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-5, 7, -3);
+	glVertex3f(-5, 5, -3);
 	glEnd();
+
+	glPushMatrix();
+	glTranslatef(5, 0, 3);
+	glRotatef(90, 1.0f, 0.0f, 0.0f);
+	drawWheel(doingShadow);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(5, 0, -3);
+	glRotatef(90, 1.0f, 0.0f, 0.0f);
+	drawWheel(doingShadow);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-5, 0, 3);
+	glRotatef(90, 1.0f, 0.0f, 0.0f);
+	drawWheel(doingShadow);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-5, 0, -3);
+	glRotatef(90, 1.0f, 0.0f, 0.0f);
+	drawWheel(doingShadow);
+	glPopMatrix();
 }
 
 void  TrainView::
@@ -1029,14 +1052,31 @@ void TrainView::
 drawWheel(bool doingShadow)
 {
 	float x = 0.0f, y = 0.0f, z = 0.0f;
-	float r = 5.0f;
+	float r = 1.5f;
 
 	glBegin(GL_TRIANGLE_FAN);
+	if (!doingShadow)
+		glColor3ub(0, 0, 0);
+	glVertex3f(x, y + 1.0f, z);
+	for (int i = 0; i <= 360; ++i)
+		glVertex3f(x + r * cos(i * PI / 180.0) , y + 1.0f, z + r * sin(i * PI / 180.0));
+	glEnd();
 
-	glVertex3f(x, y, z);
+	glBegin(GL_TRIANGLE_FAN);
+	if (!doingShadow)
+		glColor3ub(0, 0, 0);
+	glVertex3f(x, y - 1.0f, z);
+	for (int i = 0; i <= 360; ++i)
+		glVertex3f(x + r * cos(i * PI / 180.0), y - 1.0f, z + r * sin(i * PI / 180.0));
+	glEnd();
 
-	/*for (int i = 0; i < 360; ++i)
-		glVertex3f(r * , y, );*/
-
+	glBegin(GL_TRIANGLE_STRIP);
+	if (!doingShadow)
+		glColor3ub(0, 0, 0);
+	for (int i = 0; i <= 360; ++i)
+	{
+		glVertex3f(r * cos(i * PI / 180.0), 1.0f, r * sin(i * PI / 180.0));
+		glVertex3f(r * cos(i * PI / 180.0), -1.0f, r * sin(i * PI / 180.0));
+	}
 	glEnd();
 }

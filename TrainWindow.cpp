@@ -235,4 +235,9 @@ advanceTrain(float dir)
 	trainView->t_time += (dir / m_Track.points.size() / (trainView->DIVIDE_LINE / 40));
 	if (trainView->t_time > 1.0f)
 		trainView->t_time -= 1.0f;
+
+	if (arcLength->value())
+	{
+
+	}
 }
